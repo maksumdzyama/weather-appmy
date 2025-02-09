@@ -3,6 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Перевірка погоди</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #74ebd5, #acb6e5);
+        }
+
+        .weather-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 20px 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        input {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #weatherOutput {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        .day {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .day h3 {
+            margin: 0;
+            color: #4CAF50;
+        }
+
+        .day p {
+            margin: 5px 0 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-container">
+        <h1>Дізнайтесь погоду у вашому місті</h1>
+        <input type="text" id="cityName" placeholder="Введіть назву міста">
+        <button id="getWeatherBtn">Отримати погоду</button>
+        <div id="weatherOutput"></div>
+    </div>
+
+    <script>
+        document.querySelector('#getWeatherBtn').addEventListener('click', async () => {
+            const city = document.querySelector('#cityName').value.trim();
+            const output = document.querySelector('#weatherOutput');
+
+            if (!city) {
+                output.textContent = 'Будь ласка, введіть назву міста.';
+                return;
+            }
+
+            const API_KEY = '15e19f0211d3e502c6b3a9d0860cc6cd';
+            const API_URL = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric&lang=ua`;
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Місто не знайдено. Перевірте правильність назви.');
+                    } else {
+                        throw new Error('Помилка сервера. Спробуйте ще раз пізніше.');
+                    }
+                }
+
+                const weatherData = await response.json();
+                let forecastHtml = <h2>Прогноз погоди на тиждень для ${weatherData.city.name}:</h2>;
+
+                const dailyData = weatherData.list.filter(item => item.dt_txt.includes('12:00:00'));
+
+                dailyData.forEach(day => {
+                    const date = new Date(day.dt * 1000);
+                    const options = { weekday: 'long', day: 'numeric', month: 'long' };
+                    const formattedDate = date.toLocaleDateString('uk-UA', options);
+                    const description = day.weather[0].description; // Опис безпосередньо з API
+
+Максимко, [09.02.2025 19:49]
+forecastHtml += `
+                        <div class="day">
+                            <h3>${formattedDate}</h3>
+                            <p>Температура: ${day.main.temp}°C</p>
+                            <p>Опис: ${description}</p>
+                        </div>
+                    `;
+                });
+
+                output.innerHTML = forecastHtml;
+            } catch (error) {
+                output.textContent = `Помилка: ${error.message}`;
+            }
+        });
+    </script>
+</body>
     <title>Інформація про Спортивні Добавки та Протеїн</title>
     <style>
         body {
